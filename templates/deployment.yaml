@@ -1,13 +1,10 @@
-# This YAML file demonstrates how to deploy the external
-# provisioner for use with the mock CSI driver. It
-# depends on the RBAC definitions from rbac.yaml.
 ---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: csi-provisioner
 spec:
-  replicas: 3
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
       app: csi-provisioner
@@ -19,14 +16,28 @@ spec:
       serviceAccount: csi-provisioner
       containers:
         - name: csi-provisioner
-          image: gcr.io/k8s-staging-sig-storage/csi-provisioner:canary
+          image: gcr.io/k8s-staging-sig-storage/csi-provisioner:v5.0.0
           args:
             - "--csi-address=$(ADDRESS)"
+{% if eq .Values.replicas 3 %}
             - "--leader-election"
+{%- endif %}
             - "--http-endpoint=:8080"
+{% if .Values.enableStorageCapacity %}
+            - "--enable-capacity"
+            - "--capacity-ownerref-level=2"
+{%- endif %}
           env:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/mock.socket
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           imagePullPolicy: "IfNotPresent"
           volumeMounts:
             - name: socket-dir

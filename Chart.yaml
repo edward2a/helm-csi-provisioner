@@ -1,0 +1,5 @@
+apiVersion: v2
+appVersion: v5.0.0
+description: Kubernetes CSI Provisioner
+name: csi-provisioner
+version: 0.0.1

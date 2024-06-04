@@ -19,14 +19,14 @@ spec:
           image: gcr.io/k8s-staging-sig-storage/csi-provisioner:v5.0.0
           args:
             - "--csi-address=$(ADDRESS)"
-{% if eq .Values.replicas 3 %}
+{{- if eq (.Values.replicas | int) 3 }}
             - "--leader-election"
-{%- endif %}
+{{- end }}
             - "--http-endpoint=:8080"
-{% if .Values.enableStorageCapacity %}
+{{- if .Values.enableStorageCapacity }}
             - "--enable-capacity"
             - "--capacity-ownerref-level=2"
-{%- endif %}
+{{- end }}
           env:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/mock.socket
